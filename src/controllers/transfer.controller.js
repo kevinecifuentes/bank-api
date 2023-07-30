@@ -4,11 +4,17 @@ const User = require('./../models/user.model');
 exports.sendTransfer = async (req, res) => {
   try {
     const { senderUserId, receiverUserId, amount } = req.body;
-    const { accountNumber, id } = req.body;
+    const { accountNumber } = req.body;
 
     const user = await User.findOne({
       where: {
         accountNumber,
+      },
+    });
+
+    const senderUser = await User.findOne({
+      where: {
+        id: senderUserId,
       },
     });
 
@@ -19,18 +25,25 @@ exports.sendTransfer = async (req, res) => {
       });
     }
 
-    const transferCreated = await Transfer.create({
-      senderUserId,
-      receiverUserId,
-      amount,
-    });
-
-    if (user.amount < amount) {
+    if (senderUser.amount < amount) {
       return res.status(403).json({
         status: 'invalid',
         message: 'you do not have enough money in your account',
       });
     }
+
+    const transferCreated = await Transfer.create({
+      accountNumber,
+      senderUserId,
+      receiverUserId,
+      amount,
+    });
+
+    const newAmountSenderUser = senderUser.amount - amount;
+    await senderUser.update({ amount: newAmountSenderUser });
+
+    const newAmountReceiverUser = user.amount + amount;
+    await user.update({ amount: newAmountReceiverUser });
 
     return res.status(200).json({
       status: 'transfer send succesfully',

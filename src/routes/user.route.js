@@ -8,6 +8,6 @@ const router = express.Router();
 router
   .post('/signup', userControllers.createUser)
   .post('/login', userControllers.loginUser)
-  .get('/:id/history');
+  .get('/:id/history', userControllers.getHistory);
 
 module.exports = router;

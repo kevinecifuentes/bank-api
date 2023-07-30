@@ -2,6 +2,39 @@ const User = require('./../models/user.model');
 const randomNumber = require('./../utils/getRandomNumber');
 const bcrypt = require('bcryptjs');
 const generateJWT = require('./../utils/jwt');
+const Transfer = require('./../models/transfer.model');
+
+exports.getHistory = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const transferReceived = await Transfer.findAll({
+      where: {
+        receiverUserId: id,
+      },
+    });
+
+    const transferSended = await Transfer.findAll({
+      where: {
+        senderUserId: id,
+      },
+    });
+
+    return res.status(200).json({
+      status: 'succes',
+      message: 'transfers history found',
+      transferReceived,
+      transferSended,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Error getting all registers',
+      error,
+    });
+  }
+};
 
 exports.createUser = async (req, res) => {
   try {
