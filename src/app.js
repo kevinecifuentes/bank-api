@@ -13,6 +13,6 @@ if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 
 //routes created
 app.use('/api/v1/users', userRoutes);
-app.use('/app/v1/transfers', trasferRoutes);
+app.use('/api/v1/transfers', trasferRoutes);
 
 module.exports = app;
