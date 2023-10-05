@@ -1,12 +1,11 @@
 const { DataTypes } = require('sequelize');
-const { db } = require('./../database/config');
-const randomNumber = require('./../utils/getRandomNumber');
+const { db } = require('../database/config');
 
 const User = db.define('users', {
   id: {
     type: DataTypes.INTEGER,
-    autoIncrement: true,
     primaryKey: true,
+    autoIncrement: true,
     allowNull: false,
   },
   name: {
@@ -16,7 +15,6 @@ const User = db.define('users', {
   accountNumber: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    field: 'acount_number',
   },
   password: {
     type: DataTypes.STRING,
@@ -25,13 +23,14 @@ const User = db.define('users', {
   amount: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    defaultValue: 1000,
+    // defaultValue: 1000
   },
   status: {
-    type: DataTypes.ENUM('active', 'desactived'),
+    type: DataTypes.ENUM('active', 'disabled'),
     allowNull: false,
     defaultValue: 'active',
   },
 });
 
 module.exports = User;
+

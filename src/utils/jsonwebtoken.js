@@ -1,24 +1,26 @@
 const jwt = require('jsonwebtoken');
 
 const generateJWT = (id) => {
-  return new Promise((res, rej) => {
+  return new Promise((resolve, reject) => {
     const payload = { id };
 
     jwt.sign(
       payload,
-      process.env.SECRET_JWT,
+      process.env.SECRET_JWT_SEED,
       {
-        expiresIn: process.env.JWT_TIME_EXPIRE,
+        expiresIn: process.env.JWT_EXPIRE_IN,
       },
       (err, token) => {
         if (err) {
-          rej(err);
+          console.log(err);
+          reject(err);
         }
 
-        res(token);
+        resolve(token);
       }
     );
   });
 };
 
 module.exports = generateJWT;
+

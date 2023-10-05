@@ -1,12 +1,12 @@
 const { DataTypes } = require('sequelize');
-const { db } = require('./../database/config');
+const { db } = require('../database/config');
 
-const Transfer = db.define('transfers', {
+const Transfers = db.define('transfers', {
   id: {
     type: DataTypes.INTEGER,
-    autoIncrement: true,
-    allowNull: false,
     primaryKey: true,
+    allowNull: false,
+    autoIncrement: true,
   },
   amount: {
     type: DataTypes.INTEGER,
@@ -15,13 +15,15 @@ const Transfer = db.define('transfers', {
   senderUserId: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    field: 'sender_user_id',
   },
-  receiverUserId: {
+  reciverUserId: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    field: 'receiver_user_id',
+  },
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
   },
 });
 
-module.exports = Transfer;
+module.exports = Transfers;

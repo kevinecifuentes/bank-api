@@ -1,115 +1,91 @@
-const User = require('./../models/user.model');
-const randomNumber = require('./../utils/getRandomNumber');
+const User = require('../models/users.model');
+const AppError = require('../utils/app.Error');
+const catchAsync = require('../utils/catchAsync');
 const bcrypt = require('bcryptjs');
-const generateJWT = require('./../utils/jwt');
-const Transfer = require('./../models/transfer.model');
+const jsonwebtoken = require('../utils/jsonwebtoken');
+const generateJWT = require('../utils/jsonwebtoken');
+const Transfers = require('../models/transfers.model');
 
-exports.getHistory = async (req, res) => {
-  try {
-    const { id } = req.params;
+//crear una cuenta de usuario
+exports.accountUserCreate = catchAsync(async (req, res, next) => {
+  const { name, password } = req.body;
 
-    const transferReceived = await Transfer.findAll({
-      where: {
-        receiverUserId: id,
-      },
-    });
+  const salt = await bcrypt.genSalt(12);
+  const encryptedPassword = await bcrypt.hash(password, salt);
 
-    const transferSended = await Transfer.findAll({
-      where: {
-        senderUserId: id,
-      },
-    });
+  const accountNumber = Math.floor(Math.random() * 900000 + 100000);
 
-    return res.status(200).json({
-      status: 'succes',
-      message: 'transfers history found',
-      transferReceived,
-      transferSended,
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      status: 'error',
-      message: 'Error getting all registers',
-      error,
-    });
+  const userAmonut = 1000;
+
+  const user = await User.create({
+    name: name.toLowerCase().trim(),
+    password: encryptedPassword,
+    accountNumber: accountNumber,
+    amount: userAmonut,
+  });
+
+  const token = await generateJWT(user.id);
+
+  return res.status(201).json({
+    status: 'success',
+    message: 'user account create successfully!',
+    token,
+    user: {
+      id: user.id,
+      name: user.name,
+      accountNumber: user.accountNumber,
+      amount: user.amount,
+      createdAt: user.createdAt,
+    },
+  });
+});
+
+//ingreso de usuario con la cuenta ya existente
+exports.accountLoginUser = catchAsync(async (req, res, next) => {
+  const { accountNumber, password } = req.body;
+
+  const user = await User.findOne({
+    where: {
+      accountNumber,
+      status: 'active',
+    },
+  });
+
+  if (!user) {
+    return next(
+      new AppError(`incorrect account number or incorrect password`, 404)
+    );
   }
-};
 
-exports.createUser = async (req, res) => {
-  try {
-    const { name, password } = req.body;
-
-    const salt = await bcrypt.genSalt(13);
-    const encryptPassword = await bcrypt.hash(password, salt);
-
-    const user = await User.create({
-      name: name.toLowerCase().trim(),
-      password: encryptPassword,
-      accountNumber: randomNumber(),
-    });
-
-    const token = await generateJWT(user.id);
-
-    return res.status(200).json({
-      status: 'succes',
-      message: 'user has been created',
-      token,
-      user: {
-        name,
-        accountNumber: user.accountNumber,
-        amount: user.amount,
-      },
-    });
-  } catch (error) {
-    console.log(error);
-
-    return res.status(500).json({
-      status: 'fail',
-      message: 'something went wrong!',
-      error,
-    });
+  if (!(await bcrypt.compare(password, user.password))) {
+    return next(new AppError('incorrect accountNumber or Password', 401));
   }
-};
 
-exports.loginUser = async (req, res) => {
-  try {
-    //1 traer el acount y el password
-    const { accountNumber, password } = req.body;
+  const token = await generateJWT(user.id);
 
-    //2 buscar el usuario y verificar si existe
-    const user = await User.findOne({
-      where: {
-        accountNumber: accountNumber.trim(),
-        status: 'active',
-      },
-    });
+  return res.status(200).json({
+    status: 'success',
+    message: `User Login Succesfully`,
+    token,
+    user: {
+      id: user.id,
+      name: user.name,
+      accountNumber: user.accountNumber,
+      amount: user.amount,
+      createdAt: user.createdAt,
+    },
+  });
+});
 
-    if (!user) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'user not found',
-      });
-    }
+// obtener todas la transferencias
+exports.trasnsferUserList = catchAsync(async (req, res, next) => {
+  const { user } = req;
 
-    //3 validar si la contraseña es correcta y desencriptar
-    if (!(await bcrypt.compare(password, user.password))) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'acount number or email incorrect',
-      });
-    }
+  return res.status(200).json({
+    status: 'success',
+    message: 'hello this is trasnsferUserLis',
+    user,
+  });
+});
 
-    return res.status(200).json({
-      status: 'login succes',
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      status: 'fail',
-      message: 'something went wrong!',
-    });
-  }
-};
-
-//refactorizar código
+//refactorizar código: Ya lo refactorize Jesus Bernal

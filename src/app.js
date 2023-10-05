@@ -1,18 +1,31 @@
 const express = require('express');
 const morgan = require('morgan');
+const AppError = require('./utils/app.Error');
 
 //routes
-const userRoutes = require('./routes/user.route');
-const trasferRoutes = require('./routes/transfer.route');
+const UserRoutes = require('./routes/user.route');
+const transfersRoutes = require('./routes/transfers.route');
+const globalErrorHandler = require('./controllers/error.controller');
 
 const app = express();
 
 app.use(express.json());
 
-if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
 
-//routes created
-app.use('/api/v1/users', userRoutes);
-app.use('/api/v1/transfers', trasferRoutes);
+//routes
+app.use('/api/v1/users', UserRoutes);
+app.use('/api/v1/', transfersRoutes);
+
+app.all('*', (req, res, next) => {
+  return next(
+    new AppError(`can't find ${req.originalUrl} on this server!`, 404)
+  );
+});
+
+app.use(globalErrorHandler);
 
 module.exports = app;
+
