@@ -1,5 +1,5 @@
 <p align="center">
-<img src="./public/img/presentation.jpg" width="350" alt="Nest Logo" />
+<img src="./public/img/presentation.jpg" width="400" alt="Nest Logo" />
 </p>
 
 
